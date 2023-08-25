@@ -1,67 +1,55 @@
+
 object Q4 {
   def main(args: Array[String]): Unit = {
-    var accountList: List[Account] = List()
+    val accountA = new Account("ACC1", 1000)
+    val accountB = new Account("ACC2", 500)
+    accountB.withdraw(1000)
+    val accountC = new Account("ACC3", 2000)
 
-    def accCreate(nic: String, accId: Int): Unit = {
-      val acc = new Account(nic, accId)
-      accountList = accountList ::: acc :: Nil
-      println(accountList)
+    val bank = List(accountA, accountB, accountC)
+
+    println("Accounts with negative balances:")
+    BankFunctions.accountsWithNegativeBalances(bank).foreach(println)
+
+    println(s"Total balance of all accounts: ${BankFunctions.calculateTotalBalance(bank)}")
+
+    println("Applying interest to accounts:")
+    BankFunctions.applyInterestToAccounts(bank)
+    bank.foreach(println)
+  }
+
+  class Account(val accountNumber: String, var balance: Double = 0.0) {
+    require(balance >= 0, "Initial balance cannot be negative")
+
+    def deposit(amount: Double): Unit = {
+      require(amount > 0, "Deposit amount must be positive")
+      balance += amount
     }
 
-    val find = (a: Int, b: List[Account]) => b.filter(account => account.accId.equals(a))
-    val overdraft = (b: List[Account]) => b.filter(account => account.balance < 0.0)
-    val totalBalance = (b: List[Account]) => b.foldLeft(0.0)((x, y) => x + y.balance)
-    val interest = (b: List[Account]) => b.map(account => if (account.balance > 0) account.balance * 0.05 else account.balance * 0.1)
-
-    /* Driver Code */
-
-    // Create accounts
-    accCreate("1", 1)
-    accCreate("2", 2)
-
-    // Deposit money
-    find(1, accountList)(0).deposit(1000)
-    println(find(1, accountList)(0))
-
-    // Transfer money
-    find(1, accountList)(0).transfer(2, 100.0, accountList)
-    println(find(2, accountList)(0))
-
-    // List of negative balances
-    println(overdraft(accountList))
-
-    // Sum of all account balances
-    println(totalBalance(accountList))
-
-    // Final balances of all accounts after applying interest
-    println(interest(accountList))
-  }
-}
-
-class Account(nic: String, val accId: Int, var balance: Double = 0.0) {
-
-  def withdraw(amount: Double): Unit = {
-    this.balance = this.balance - amount
-  }
-
-  def deposit(amount: Double): Unit = {
-    this.balance = this.balance + amount
-  }
-
-  def transfer(account: Int, amount: Double, accountList: List[Account]): Unit = {
-    val transferAccOpt = accountList.find(acc => acc.accId == account)
-    transferAccOpt match {
-      case Some(transferAcc) =>
-        if (balance < amount) {
-          println("Insufficient balance")
-        } else {
-          this.withdraw(amount)
-          transferAcc.deposit(amount)
-        }
-      case None =>
-        println("Account not found for transfer")
+    def withdraw(amount: Double): Unit = {
+      require(amount > 0, "Withdrawal amount must be positive")
+      balance -= amount
     }
+
+    def applyInterest(): Unit = {
+      if (balance > 0) {
+        balance *= 1.05
+      } else if (balance < 0) {
+        balance *= 1.1
+      }
+    }
+
+    override def toString: String = s"[$accountNumber:$balance]"
   }
 
-  override def toString: String = s"[$nic:$accId:$balance]"
+  object BankFunctions {
+    def accountsWithNegativeBalances(accounts: List[Account]): List[Account] =
+      accounts.filter(_.balance < 0)
+
+    def calculateTotalBalance(accounts: List[Account]): Double =
+      accounts.map(_.balance).sum
+
+    def applyInterestToAccounts(accounts: List[Account]): Unit =
+      accounts.foreach(_.applyInterest())
+  }
 }

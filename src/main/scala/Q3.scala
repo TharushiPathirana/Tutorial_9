@@ -1,51 +1,40 @@
+
+
 object Q3 {
+  def main(args: Array[String]): Unit = {
+    val accountA = new Account("A123", 1, 1000)
+    val accountB = new Account("B456", 2, 500)
+
+    accountA.deposit(200)
+    println(accountA)
+
+    accountA.transfer(300, accountB)
+    println(accountA)
+    println(accountB)
+  }
+
   class Account(nic: String, val accId: Int, var balance: Double = 0.0) {
-    def withdraw(amount: Double): Unit = {
-      this.balance = this.balance - amount
-    }
+    require(balance >= 0, "Initial balance cannot be negative")
 
     def deposit(amount: Double): Unit = {
-      this.balance = this.balance + amount
+      require(amount > 0, "Deposit amount must be positive")
+      balance += amount
     }
 
-    def transfer(account: Int, amount: Double, accountList: List[Account]): Unit = {
-      val transferAccOpt = accountList.find(acc => acc.accId == account)
-      transferAccOpt match {
-        case Some(transferAcc) =>
-          if (balance < amount) {
-            println("Insufficient balance")
-          } else {
-            this.withdraw(amount)
-            transferAcc.deposit(amount)
-          }
-        case None =>
-          println("Account not found for transfer")
-      }
+    def withdraw(amount: Double): Unit = {
+      require(amount > 0, "Withdrawal amount must be positive")
+      require(amount <= balance, "Insufficient balance")
+      balance -= amount
+    }
+
+    def transfer(amount: Double, toAccount: Account): Unit = {
+      require(amount > 0, "Transfer amount must be positive")
+      require(amount <= balance, "Insufficient balance for transfer")
+
+      withdraw(amount)
+      toAccount.deposit(amount)
     }
 
     override def toString: String = s"[$nic:$accId:$balance]"
-  }
-
-  def main(args: Array[String]): Unit = {
-    var accountList: List[Account] = List()
-
-    def accCreate(nic: String, accId: Int): Unit = {
-      val acc = new Account(nic, accId)
-      accountList = accountList ::: acc :: Nil
-      println(accountList)
-    }
-
-    /* Driver Code */
-
-    accCreate("1", 1)
-    accCreate("2", 2)
-
-    // Deposit money
-    accountList.headOption.foreach(_.deposit(1000))
-    println(accountList.headOption.getOrElse("Account not found"))
-
-    // Transfer money
-    accountList.headOption.foreach(_.transfer(2, 100.0, accountList))
-    println(accountList.tail.headOption.getOrElse("Account not found"))
   }
 }
