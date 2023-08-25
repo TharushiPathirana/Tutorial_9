@@ -1,9 +1,7 @@
-
-
 object Q3 {
   def main(args: Array[String]): Unit = {
-    val accountA = new Account("A123", 1, 1000)
-    val accountB = new Account("B456", 2, 500)
+    val accountA = new Account("ACC1", 1, 1000)
+    val accountB = new Account("ACC2", 2, 500)
 
     accountA.deposit(200)
     println(accountA)
@@ -23,14 +21,12 @@ object Q3 {
 
     def withdraw(amount: Double): Unit = {
       require(amount > 0, "Withdrawal amount must be positive")
-      require(amount <= balance, "Insufficient balance")
       balance -= amount
     }
 
     def transfer(amount: Double, toAccount: Account): Unit = {
       require(amount > 0, "Transfer amount must be positive")
-      require(amount <= balance, "Insufficient balance for transfer")
-
+//      require(amount <= balance, "Insufficient balance for transfer")
       withdraw(amount)
       toAccount.deposit(amount)
     }
